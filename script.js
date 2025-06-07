@@ -197,14 +197,16 @@ const keywords = {
   },
   // אורך סרט
   duration: {
-    "קצר": ["קצר", "מהיר", "קליל", "קצת זמן"],
-    "בינוני": ["בינוני", "רגיל", "סטנדרטי"],
-    "ארוך": ["ארוך", "מפואר", "אפי", "מקיף"]
+    "קצר": ["קצר", "מהיר", "קליל", "קצת זמן", "לא יותר מידי", "משהו קטן", "עד שעה וחצי"],
+    "בינוני": ["בינוני", "רגיל", "סטנדרטי", "נורמלי", "כשעתיים", "לא יותר מדי ארוך"],
+    "ארוך": ["ארוך", "יותר משעתיים", "סרט ארוך", "אין לי בעיה עם זמן"]
   },
   // פקודות
   commands: {
     "אחרים": ["אחרים", "נוספים", "עוד", "הבאים", "אחר"],
-    "איפוס": ["התחל שיחה חדשה", "אפס", "חדש", "התחל מחדש"]
+    "איפוס": ["התחל שיחה חדשה", "אפס", "חדש", "התחל מחדש"],
+    "תודה": ["תודה", "תודה רבה", "תודות", "thanks", "thank you", "אני מרוצה", "מצאתי", "זה מה שחיפשתי", "מושלם", "בדיוק", "נהדר"],
+    "סיום": ["ביי", "להתראות", "עד הפעם הבאה", "bye", "goodbye", "נתראה", "תודה ושלום", "זהו", "סיימנו", "גמרנו"]
   }
 };
 
@@ -231,6 +233,20 @@ let conversationMemory = {
   },
   recommendationOffset: 0
 };
+
+const goodbyeMessages = [
+  "תודה שהשתמשת באוסקר! 🎬 מקווה שתהנה מהסרט! עד הפעם הבאה! 👋",
+  "היה כיף לעזור לך למצוא סרט! 🍿 בילוי נעים וחזור מתי שתרצה! 😊",
+  "אני שמח שעזרתי! 🎭 תהנה מהצפייה ואשמח לראות אותך שוב! 🌟",
+  "תודה על הביקור! 🎥 מקווה שהמלצותיי היו שימושיות. עד המפגש הבא! 🤗"
+];
+
+const thankYouMessages = [
+  "על לא דבר! 😊 אני כאן בשבילך מתי שתרצה המלצות נוספות! 🎬",
+  "אני שמח שעזרתי! 🎭 תהנה מהסרט ותחזור אליי מתי שתרצה! 🍿",
+  "תמיד בשמחה! 🌟 מקווה שתהנה מהצפייה! אני כאן אם תצטרך עוד המלצות! 🎥",
+  "זה בדיוק למה אני כאן! 😄 חזור אליי מתי שתרצה המלצות חדשות! 🎬"
+];
 
 // עדכון שאלות אינטראקטיביות
 const interactiveQuestions = [
@@ -272,13 +288,27 @@ function analyzeText(text) {
 
   console.log("Debug: analyzeText - Input lowerText:", lowerText);
 
-  // זיהוי פקודות
-  for (const [command, words] of Object.entries(keywords.commands)) {
-    if (words.some(word => lowerText.includes(word))) {
-      analysis.command = command;
-      break;
+// זיהוי פקודות
+for (const [command, words] of Object.entries(keywords.commands)) {
+  // בדיקה מדויקת יותר - המילה צריכה להיות בתחילת או סוף המשפט או כמילה נפרדת
+  const wordMatch = words.some(word => {
+    if (command === "סיום") {
+      // עבור מילות סיום, נבדוק התאמה מדויקת או בתחילת/סוף המשפט
+      return lowerText === word || 
+             lowerText.startsWith(word + " ") || 
+             lowerText.endsWith(" " + word) ||
+             lowerText.includes(" " + word + " ");
+    } else {
+      // עבור פקודות אחרות, השתמש בלוגיקה הקיימת
+      return lowerText.includes(word);
     }
+  });
+
+  if (wordMatch) {
+    analysis.command = command;
+    break;
   }
+}
 
   // זיהוי ז'אנרים - שיפור הזיהוי
   for (const [genre, words] of Object.entries(keywords.genres)) {
@@ -338,20 +368,24 @@ function analyzeText(text) {
     /(?:ל|ב)מבוגרים\s*(?:בגיל)?\s*(\d+)/ // למבוגרים בגיל 13
   ];
 
-  // בדיקת גיל לפי מספרים
-  for (const pattern of agePatterns) {
-    const match = lowerText.match(pattern);
-    if (match) {
-      const age = parseInt(match[1]);
-      if (!isNaN(age)) {
-        if (age < 13) analysis.ageRange = "7+";
-        else if (age < 16) analysis.ageRange = "13+";
-        else if (age < 17) analysis.ageRange = "16+";
-        else analysis.ageRange = "17+";
-        break;
-      }
+  // תיקון נכון של לוגיקת הגילאים בפונקציה analyzeText
+// חפשי את החלק הזה והחליפי אותו:
+
+// בדיקת גיל לפי מספרים
+for (const pattern of agePatterns) {
+  const match = lowerText.match(pattern);
+  if (match) {
+    const age = parseInt(match[1]);
+    if (!isNaN(age)) {
+      // הלוגיקה הנכונה לפי 3 קטגוריות:
+      if (age >= 7 && age <= 12) analysis.ageRange = "7+";
+      else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
+      else if (age >= 17) analysis.ageRange = "17+";
+      // אם הגיל קטן מ-7, לא נגדיר כלום (ייפול ל-default)
+      break;
     }
   }
+}
 
   console.log("Debug: analyzeText - Detected ageRange (from patterns/numbers):", analysis.ageRange);
 
@@ -360,21 +394,20 @@ function analyzeText(text) {
     const ageKeywords = {
       "7+": [
         "ילדים", "משפחתי", "ילד", "קטן", "צעיר", "לילדים", "לילד", "לילדה",
-        "בן 5", "בת 5", "בן 6", "בת 6", "בן 7", "בת 7", "בן 8", "בת 8", "בן 9", "בת 9", "בן 10", "בת 10",
+        "בן 7", "בת 7", "בן 8", "בת 8", "בן 9", "בת 9", "בן 10", "בת 10",
         "בן 11", "בת 11", "בן 12", "בת 12", "לכל המשפחה", "קטינים", "לגיל הרך"
       ],
       "13+": [
         "נוער", "נער", "נערה", "לנוער", "לנער", "לנערה", "מתבגר", "מתבגרת",
-        "בן 13", "בת 13", "בן 14", "בת 14", "בן 15", "בת 15"
-      ],
-      "16+": [
-        "בן 16", "בת 16", "מגיל 16"
+        "בן 13", "בת 13", "בן 14", "בת 14", "בן 15", "בת 15", "בן 16", "בת 16"
       ],
       "17+": [
         "מבוגרים", "בוגר", "מבוגר", "למבוגרים", "לבוגר", "לבוגרת",
-        "בן 17", "בת 17", "בן 18", "בת 18", "למבוגרים בלבד", "לקהל בוגר", "מגיל 18", "17+", "18+"
+        "בן 17", "בת 17", "בן 18", "בת 18", "למבוגרים בלבד", "לקהל בוגר", 
+        "מגיל 17", "מגיל 18", "17+", "18+"
       ]
     };
+    
 
     for (const [ageRange, keywords] of Object.entries(ageKeywords)) {
       if (keywords.some(keyword => lowerText.includes(keyword))) {
@@ -512,7 +545,41 @@ function generateSmartResponse(message, movies) {
   console.log("Debug: generateSmartResponse - analysis from current message:", analysis);
   console.log("Debug: generateSmartResponse - conversationMemory before update:", { ...conversationMemory });
 
-  // שינוי חשוב: לא לאפס offset אם זה רק מידע משלים (כמו גיל שנוסף לאחר ז'אנר)
+
+  if (analysis.command === "תודה") {
+    const randomThankYou = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+    return randomThankYou;
+  }
+  
+  if (analysis.command === "סיום") {
+    const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
+    // איפוס השיחה
+    conversationMemory = {
+      lastGenres: [],
+      lastMoods: [],
+      lastPlatforms: [],
+      lastRecommendations: [],
+      lastQuestion: null,
+      userPreferences: {
+        age: null,
+        duration: null,
+        favoriteActors: [],
+        favoriteDirectors: []
+      },
+      conversationState: "collecting_info",
+      collectedInfo: {
+        genres: false,
+        age: false,
+        mood: false,
+        duration: false,
+        platforms: false
+      },
+      recommendationOffset: 0
+    };
+    return randomGoodbye;
+  }
+
+  // שינוי חשוב: לא לאפס offset אם זה רק מידע משלים
   const isNewGenreRequest = analysis.genres.length > 0 && 
     (conversationMemory.lastGenres.length === 0 || 
      JSON.stringify(analysis.genres) !== JSON.stringify(conversationMemory.lastGenres));
@@ -561,14 +628,12 @@ function generateSmartResponse(message, movies) {
 
   console.log("Debug: generateSmartResponse - allRequiredInfoCollected:", allRequiredInfoCollected);
 
-  if (allRequiredInfoCollected) {
+if (allRequiredInfoCollected) {
     conversationMemory.conversationState = "recommending";
     
-    // DEBUG: הדפסת הז'אנרים שמחפשים
     console.log("🎯 מחפש סרטים עם הז'אנרים:", conversationMemory.lastGenres);
     
     const foundMovies = analyzeAndFindMovies(message, movies);
-    
     const moviesToRecommend = foundMovies.slice(conversationMemory.recommendationOffset, conversationMemory.recommendationOffset + 3);
 
     if (moviesToRecommend.length > 0) {
@@ -579,7 +644,7 @@ function generateSmartResponse(message, movies) {
       });
       
       if (foundMovies.length > (conversationMemory.recommendationOffset + 3)) {
-        response += "<br>רוצה לראות המלצות נוספות? פשוט תגיד 'עוד' או 'אחרים'! 😉";
+        response += "<br>רוצה לראות המלצות נוספות? פשוט תגיד 'עוד' או 'אחרים'! 😉<br>";
       }
 
       // הוספת תגובה מותאמת למצב רוח
@@ -774,13 +839,12 @@ function analyzeAndFindMovies(message, movies) {
       if (movieAgeRange === "All Ages") {
         isMatch = true; // "All Ages" מתאים לכל הגילאים
       } else {
-        const movieAgeNumber = parseInt(movieAgeRange);
-        const userAgeNumber = parseInt(userAgePreference);
-        
-        if (userAgeNumber >= 16) {
-          isMatch = movieAgeNumber >= userAgeNumber;
-        } else {
-          isMatch = movieAgeNumber <= userAgeNumber;
+        if (userAgePreference === "7+") {
+          isMatch = (movieAgeRange === "7+");
+        } else if (userAgePreference === "13+") {
+          isMatch = (movieAgeRange === "7+" || movieAgeRange === "13+");
+        } else if (userAgePreference === "17+") {
+          isMatch = true; // מבוגרים יכולים לראות הכל
         }
       }
       
