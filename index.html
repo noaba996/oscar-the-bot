@@ -46,7 +46,7 @@
       flex-direction: column;
       gap: 20px;
       margin-bottom: 20px;
-      overflow: hidden; 
+      overflow: hidden; /* שינוי: מונע גלילה של הקונטיינר */
       min-height: 0;
     }
 
@@ -57,8 +57,8 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       margin-bottom: 20px;
+      max-height: 80vh;
       text-align: left;
-      min-height: 0;
     }
 
     .bubble {
@@ -195,17 +195,8 @@
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: 10px; /* שינוי: הקטנת הפדינג במובייל */
-      }
-
       .container {
-        padding: 15px; /* שינוי: הקטנת הפדינג במובייל */
-      }
-
-      h1 {
-        font-size: 2em; /* שינוי: הקטנת הכותרת במובייל */
-        margin-bottom: 15px;
+        padding: 10px;
       }
 
       .bubble {
