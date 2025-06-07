@@ -11,9 +11,10 @@
       padding: 20px;
       background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
       color: #fff;
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden
     }
 
     .container {
@@ -27,12 +28,14 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      height: 100%;
+      overflow: hidden;
     }
 
     h1 {
       text-align: center;
       color: #fff;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       font-size: 2.5em;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
@@ -43,6 +46,8 @@
       flex-direction: column;
       gap: 20px;
       margin-bottom: 20px;
+      overflow: hidden; 
+      min-height: 0;
     }
 
     #conversation {
@@ -52,8 +57,8 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       margin-bottom: 20px;
-      max-height: 80vh;
       text-align: left;
+      min-height: 0;
     }
 
     .bubble {
@@ -190,8 +195,17 @@
     }
 
     @media (max-width: 600px) {
+      body {
+        padding: 10px; /* שינוי: הקטנת הפדינג במובייל */
+      }
+
       .container {
-        padding: 10px;
+        padding: 15px; /* שינוי: הקטנת הפדינג במובייל */
+      }
+
+      h1 {
+        font-size: 2em; /* שינוי: הקטנת הכותרת במובייל */
+        margin-bottom: 15px;
       }
 
       .bubble {
