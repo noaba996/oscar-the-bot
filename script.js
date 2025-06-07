@@ -957,6 +957,7 @@ async function sendMessage() {
   convo.scrollTop = convo.scrollHeight;
 }
 
+
 // פונקציה לטיפול בשגיאות
 function showError(error) {
   const convo = document.getElementById("conversation");
@@ -965,11 +966,7 @@ function showError(error) {
   if (typeof error === 'string') {
     errorMessage = error;
   } else if (error.message) {
-    if (error.message.includes("401") || error.message.includes("API")) {
-      errorMessage = `⚠️ נראה שיש בעיה עם הטוקן של Hugging Face.<br>
-        אנא בדוק שהטוקן תקין במשתנה HF_API_KEY.<br>
-        אפשר לקבל טוקן חדש ב: https://huggingface.co/settings/tokens`;
-    } else if (error.message.includes("Failed to load movies")) {
+    if (error.message.includes("Failed to load movies")) {
       errorMessage = `⚠️ לא הצלחתי לטעון את מאגר הסרטים.<br>
         אנא וודא שקובץ movies.json קיים ונגיש.`;
     }
