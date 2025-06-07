@@ -979,32 +979,50 @@ function showError(error) {
 }
 
 // אירועי מקלדת ופתיחה
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("🚀 העמוד נטען - מתחיל אתחול...");
+  
   const input = document.getElementById("userInput");
-  if (input) {
-    input.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-  }
-
-  // בדיקת חיבור API ותצוגת הודעת פתיחה
   const convo = document.getElementById("conversation");
   
-  // הודעת פתיחה
-  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-  convo.innerHTML += `<div class='bubble bot'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">${randomWelcome}</div>
-  </div>`;
-
-  // בדיקת חיבור
-  console.log("🔄 מתחיל בדיקת חיבור ל-API...");
-  const apiWorking = await testHuggingFaceAPI();
- {
-    console.log("✅ Hugging Face API מוכן לשימוש!");
+  // בדיקה שהאלמנטים קיימים
+  if (!input || !convo) {
+    console.error("❌ אלמנטים חיוניים לא נמצאו");
+    return;
   }
+  
+  console.log("✅ אלמנטים נמצאו בהצלחה");
+  
+  // הגדרת event listener לקלט
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+  console.log("✅ Event listener הוגדר לקלט");
+
+  // הודעת פתיחה
+  try {
+    const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+    console.log("🎭 הודעת ברוכים הבאים נבחרה:", randomWelcome);
+    
+    convo.innerHTML = `<div class='bubble bot'>
+      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+      <div class="bot-message">${randomWelcome}</div>
+    </div>`;
+    
+    console.log("✅ הודעת פתיחה נוספה בהצלחה");
+  } catch (error) {
+    console.error("❌ שגיאה בהוספת הודעת פתיחה:", error);
+    
+    // הודעה קבועה במקרה של שגיאה
+    convo.innerHTML = `<div class='bubble bot'>
+      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+      <div class="bot-message">שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 איזה סרט מעניין אותך היום?</div>
+    </div>`;
+  }
+  
+  console.log("🎉 אתחול הושלם בהצלחה - אוסקר מוכן לשימוש!");
 });
 
 // פונקציה לניקוי השיחה - כעת מקבלת את הודעת המשתמש כארגומנט
@@ -1044,21 +1062,4 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-}
-
-// פונקציה לבדיקת חיבור ל-Hugging Face API
-async function testHuggingFaceAPI() {
-  try {
-    const response = await fetch(MODEL_URL, {
-      headers: {
-        Authorization: `Bearer ${HF_API_KEY}`,
-      },
-      method: "POST",
-      body: JSON.stringify({ inputs: "שלום" }), // Small test input
-    });
-    return response.ok; // Returns true if status is 2xx
-  } catch (error) {
-    console.error("❌ שגיאה בבדיקת חיבור ל-API:", error);
-    return false;
-  }
 }
