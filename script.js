@@ -579,6 +579,9 @@ function generateSmartResponse(message, movies) {
     return randomGoodbye;
   }
 
+function clearConversation() {
+  document.getElementById("conversation").innerHTML = "";
+}
   // שינוי חשוב: לא לאפס offset אם זה רק מידע משלים
   const isNewGenreRequest = analysis.genres.length > 0 && 
     (conversationMemory.lastGenres.length === 0 || 
