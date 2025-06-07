@@ -195,20 +195,43 @@
     }
 
     @media (max-width: 600px) {
-      .container {
+      body {
         padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+        min-height: calc(100vh - 20px);
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 15px;
       }
 
       .bubble {
         max-width: 90%;
+        padding: 12px;
       }
 
       #userInput {
         padding: 12px;
+        font-size: 14px;
       }
 
       #sendButton {
         padding: 12px 20px;
+        font-size: 14px;
+      }
+
+      .restart-button {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+
+      #conversation {
+        margin-bottom: 15px;
+        padding: 15px;
       }
     }
   </style>
