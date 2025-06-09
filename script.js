@@ -170,12 +170,12 @@ const keywords = {
   // מצבי רוח
   moods: {
     "שמח": ["שמח", "מבדר", "קליל", "חיובי", "מאושר", "טוב לי", "מעולה", "מצוין", "נהדר", "כיפי", "קול", "בסדר", "אחלה", "סבבה"],
-    "מרומם": ["מרומם", "מעורר השראה", "מוטיבציה", "הצלחה", "מעודד", "מחזק", "מעצים", "מעורר השראה", "אופטימי", "חיובי", "השראה"],
-    "רגוע": ["רגוע", "נינוח", "שלווה", "מרגיע", "שליו", "נינוח", "מרגוע", "מנוחה", "שקט", "רפוי", "שלו"],
-    "עצוב": ["עצוב", "מעוצבן", "כועס", "עצבני", "מתסכל", "מתסכל", "מעצבן", "מרגיז", "מעיק", "קשה", "רע לי", "לא טוב לי", "מבאס", "דיכאון", "באסה", "עצבות", "בכי"],
-    "מרגש": ["מרגש", "נוגע ללב", "רגשי", "מרגש", "מרגש", "נוגע", "מרגש", "סוחף", "עוצמתי", "מותח"],
-    "מפחיד": ["מפחיד", "מלחיץ", "מסתורי", "אימה", "מפחיד", "מלחיץ", "מטריד", "מבהיל", "פחד", "בעתה", "חרדה"],
-    "רומנטי": ["רומנטי", "אהבה", "זוגי", "רומנטיקה", "אהבה", "זוגיות", "מתוק", "דביק", "נשיקה", "חיבוק"],
+    "מרומם": ["מרומם", "מעורר השראה", "מוטיבציה", "הצלחה", "מעודד", "מחזק", "מעצים", "אופטימי", "חיובי", "השראה"],
+    "רגוע": ["רגוע", "נינוח", "שלווה", "מרגיע", "שליו", "מרגוע", "מנוחה", "שקט", "רפוי", "שלו"],
+    "עצוב": ["עצוב", "מעוצבן", "כועס", "עצבני", "מתסכל", "מעצבן", "מרגיז", "מעיק", "קשה", "רע לי", "לא טוב לי", "מבאס", "דיכאון", "באסה", "עצבות", "בכי"],
+    "מרגש": ["מרגש", "נוגע ללב", "רגשי", "נוגע", "סוחף", "עוצמתי", "מותח"],
+    "מפחיד": ["מפחיד", "מלחיץ", "מסתורי", "אימה", "מטריד", "מבהיל", "פחד", "בעתה", "חרדה"],
+    "רומנטי": ["רומנטי", "אהבה", "זוגי", "רומנטיקה", "זוגיות", "מתוק", "דביק", "נשיקה", "חיבוק"],
     "נוסטלגי": ["נוסטלגי", "זיכרונות", "ילדות", "עבר", "ישן", "קלאסי", "פעם", "זכרון", "עתיק"],
     "מעורר השראה": ["מעורר השראה", "מעודד", "מחזק", "מעצים", "מוטיבציה", "השראה", "התגברות", "הצלחה"],
     "משעשע": ["משעשע", "מצחיק", "מבדר", "קליל", "הומור", "צחוק", "שעשוע", "בדיחה", "קונדסון"],
@@ -288,29 +288,26 @@ function analyzeText(text) {
 
   console.log("Debug: analyzeText - Input lowerText:", lowerText);
 
-// זיהוי פקודות
-for (const [command, words] of Object.entries(keywords.commands)) {
-  // בדיקה מדויקת יותר - המילה צריכה להיות בתחילת או סוף המשפט או כמילה נפרדת
-  const wordMatch = words.some(word => {
-    if (command === "סיום") {
-      // עבור מילות סיום, נבדוק התאמה מדויקת או בתחילת/סוף המשפט
-      return lowerText === word || 
-             lowerText.startsWith(word + " ") || 
-             lowerText.endsWith(" " + word) ||
-             lowerText.includes(" " + word + " ");
-    } else {
-      // עבור פקודות אחרות, השתמש בלוגיקה הקיימת
-      return lowerText.includes(word);
+  // זיהוי פקודות
+  for (const [command, words] of Object.entries(keywords.commands)) {
+    const wordMatch = words.some(word => {
+      if (command === "סיום") {
+        return lowerText === word || 
+               lowerText.startsWith(word + " ") || 
+               lowerText.endsWith(" " + word) ||
+               lowerText.includes(" " + word + " ");
+      } else {
+        return lowerText.includes(word);
+      }
+    });
+
+    if (wordMatch) {
+      analysis.command = command;
+      break;
     }
-  });
-
-  if (wordMatch) {
-    analysis.command = command;
-    break;
   }
-}
 
-  // זיהוי ז'אנרים - שיפור הזיהוי
+  // זיהוי ז'אנרים
   for (const [genre, words] of Object.entries(keywords.genres)) {
     if (words.some(word => lowerText.includes(word))) {
       analysis.genres.push(genre);
@@ -324,21 +321,19 @@ for (const [command, words] of Object.entries(keywords.commands)) {
     }
   }
 
-  // זיהוי פלטפורמות - שיפור משמעותי
+  // זיהוי פלטפורמות
   const platformKeywords = {
     "נטפליקס": ["נטפליקס", "netflix", "כן", "יש", "יש לי"],
     "יס": ["יס", "yes", "כן", "יש", "יש לי"],
     "הוט": ["הוט", "hot", "כן", "יש", "יש לי"]
   };
 
-  // בדיקה לכל פלטפורמה - נבדוק גם התאמה מלאה למילה בודדת
   for (const [platform, keywords] of Object.entries(platformKeywords)) {
     if (keywords.some(keyword => lowerText.includes(keyword) || lowerText === keyword)) {
       analysis.platforms.push(platform);
     }
   }
 
-  // אם יש תשובה שלילית מפורשת, מנקים את הפלטפורמות
   const negativeKeywords = ["לא", "אין", "אין לי", "אף אחד"];
   if (negativeKeywords.some(keyword => lowerText === keyword || lowerText.includes(keyword))) {
     analysis.platforms = [];
@@ -351,67 +346,54 @@ for (const [command, words] of Object.entries(keywords.commands)) {
     }
   }
 
-  // זיהוי גיל - שיפור משמעותי
+  // זיהוי גיל
   const agePatterns = [
-    /(\d+)\s*(?:שנה|שנים|גיל)/,  // בן 15 שנה, בן 15 שנים, גיל 15
-    /בן\s*(\d+)/,                // בן 15
-    /בת\s*(\d+)/,                // בת 15
-    /אני\s*(\d+)/,               // אני 15
-    /(\d+)\s*אני/,               // 15 אני
-    /^(\d+)$/,                   // רק מספר (למשל: 15)
-    /לגיל\s*(\d+)/,              // לגיל 13
-    /בגיל\s*(\d+)/,              // בגיל 13
-    /מתאים\s*(?:ל)?גיל\s*(\d+)/, // מתאים לגיל 13
-    /(?:ל|ב)גיל\s*(\d+)/,        // לגיל 13 או בגיל 13
-    /(?:ל|ב)ילדים\s*(?:בגיל)?\s*(\d+)/, // לילדים בגיל 13
-    /(?:ל|ב)נוער\s*(?:בגיל)?\s*(\d+)/,  // לנוער בגיל 13
-    /(?:ל|ב)מבוגרים\s*(?:בגיל)?\s*(\d+)/ // למבוגרים בגיל 13
+    /(\d+)\s*(?:שנה|שנים|גיל)/,
+    /בן\s*(\d+)/,
+    /בת\s*(\d+)/,
+    /אני\s*(\d+)/,
+    /(\d+)\s*אני/,
+    /^(\d+)$/,
+    /לגיל\s*(\d+)/,
+    /בגיל\s*(\d+)/,
+    /מתאים\s*(?:ל)?גיל\s*(\d+)/,
+    /(?:ל|ב)גיל\s*(\d+)/,
+    /(?:ל|ב)ילדים\s*(?:בגיל)?\s*(\d+)/,
+    /(?:ל|ב)נוער\s*(?:בגיל)?\s*(\d+)/,
+    /(?:ל|ב)מבוגרים\s*(?:בגיל)?\s*(\d+)/
   ];
 
-  // תיקון נכון של לוגיקת הגילאים בפונקציה analyzeText
-// חפשי את החלק הזה והחליפי אותו:
-
-// בדיקת גיל לפי מספרים
-for (const pattern of agePatterns) {
-  const match = lowerText.match(pattern);
-  if (match) {
-    const age = parseInt(match[1]);
-    if (!isNaN(age)) {
-      // הלוגיקה הנכונה לפי 3 קטגוריות:
-      if (age >= 7 && age <= 12) analysis.ageRange = "7+";
-      else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
-      else if (age >= 17) analysis.ageRange = "17+";
-      // אם הגיל קטן מ-7, לא נגדיר כלום (ייפול ל-default)
-      break;
+  for (const pattern of agePatterns) {
+    const match = lowerText.match(pattern);
+    if (match) {
+      const age = parseInt(match[1]);
+      if (!isNaN(age)) {
+        if (age >= 7 && age <= 12) analysis.ageRange = "7+";
+        else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
+        else if (age >= 17) analysis.ageRange = "17+";
+        break;
+      }
     }
   }
-}
 
-  console.log("Debug: analyzeText - Detected ageRange (from patterns/numbers):", analysis.ageRange);
-
-  // זיהוי גיל לפי מילות מפתח - שיפור משמעותי
   if (!analysis.ageRange) {
     const ageKeywords = {
       "7+": [
-      "ילדים", "משפחתי", "ילד", "קטן", "צעיר", "לילדים", "לילד", "לילדה",
-      "בן 7", "בת 7","7", "בן 8", "בת 8", "8", "בן 9", "בת 9", "9",
-      "בן 10", "בת 10", "10",
-      "בן 11", "בת 11", "11",
-      "בן 12", "בת 12", "12",
-      "לכל המשפחה", "קטינים", "לגיל הרך"
-    ],
+        "ילדים", "משפחתי", "ילד", "קטן", "צעיר", "לילדים", "לילד", "לילדה",
+        "בן 7", "בת 7", "7", "בן 8", "בת 8", "8", "בן 9", "בת 9", "9", "בן 10", "בת 10", "10",
+        "בן 11", "בת 11", "11", "בן 12", "בת 12", "12", "לכל המשפחה", "קטינים", "לגיל הרך"
+      ],
       "13+": [
         "נוער", "נער", "נערה", "לנוער", "לנער", "לנערה", "מתבגר", "מתבגרת",
-        "בן 13", "בת 13", "13", "בן 14", "בת 14", "14", "בן 15", "בת 15","15", "בן 16", "16", "בת 16"
+        "בן 13", "בת 13", "13", "בן 14", "בת 14", "14", "בן 15", "בת 15", "15", "בן 16", "16", "בת 16"
       ],
       "17+": [
         "מבוגרים", "בוגר", "מבוגר", "למבוגרים", "לבוגר", "לבוגרת",
         "בן 17", "בת 17", "בן 18", "בת 18", "למבוגרים בלבד", "לקהל בוגר", 
-        "מגיל 17", "מגיל 18", "17+","25", "18+"
+        "מגיל 17", "מגיל 18", "17+", "25", "18+"
       ]
     };
     
-
     for (const [ageRange, keywords] of Object.entries(ageKeywords)) {
       if (keywords.some(keyword => lowerText.includes(keyword))) {
         analysis.ageRange = ageRange;
@@ -419,8 +401,6 @@ for (const pattern of agePatterns) {
       }
     }
   }
-
-  console.log("Debug: analyzeText - Detected ageRange (from keywords):", analysis.ageRange);
 
   // זיהוי שחקנים ובמאים
   const starsMatch = lowerText.match(/משחק(?:ים)?\s+(?:בו|בה)\s+([^,.]+)/);
@@ -441,17 +421,14 @@ for (const pattern of agePatterns) {
 function calculateSimilarity(movie1, movie2) {
   let score = 0;
   
-  // השוואת ז'אנרים
   const genres1 = movie1.Genres.toLowerCase().split(", ");
   const genres2 = movie2.Genres.toLowerCase().split(", ");
   const commonGenres = genres1.filter(g => genres2.includes(g));
   score += commonGenres.length * 2;
 
-  // השוואת דירוג
   const ratingDiff = Math.abs(parseFloat(movie1.Rating) - parseFloat(movie2.Rating));
   score += (10 - ratingDiff) * 0.5;
 
-  // השוואת שנה
   const yearDiff = Math.abs(movie1.Release_Year - movie2.Release_Year);
   score += (10 - Math.min(yearDiff, 10)) * 0.3;
 
@@ -460,19 +437,10 @@ function calculateSimilarity(movie1, movie2) {
 
 // פונקציה לזיהוי טקסט לא ברור
 function isUnclearText(text) {
-  // בדיקה אם הטקסט קצר מדי
   if (text.length < 2) return true;
-  
-  // בדיקה אם הטקסט מכיל רק סימני פיסוק או רווחים
   if (/^[\s\p{P}]+$/u.test(text)) return true;
-  
-  // בדיקה אם הטקסט מכיל רק מספרים
   if (/^\d+$/.test(text)) return true;
-  
-  // בדיקה אם הטקסט מכיל רק אותיות בודדות
   if (/^[א-ת]{1,2}$/.test(text)) return true;
-  
-  // בדיקה אם הטקסט מכיל רק סימנים מיוחדים
   if (/^[^א-תa-zA-Z0-9\s]+$/.test(text)) return true;
   
   return false;
@@ -527,27 +495,15 @@ function getNextQuestion() {
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
     return null;
-  }
-
-  const questionOrder = ["genres", "age", "duration", "platforms"];
-  
-  for (const questionId of questionOrder) {
-    if (!conversationMemory.collectedInfo[questionId]) {
-      return interactiveQuestions.find(q => q.id === questionId);
-    }
-  }
-
-  return null;
 }
 
-// פונקציה ליצירת תשובה חכמה - עם התיקונים
+// פונקציה ליצירת תשובה חכמה
 function generateSmartResponse(message, movies) {
   const analysis = analyzeText(message);
   let response = "";
 
   console.log("Debug: generateSmartResponse - analysis from current message:", analysis);
   console.log("Debug: generateSmartResponse - conversationMemory before update:", { ...conversationMemory });
-
 
   if (analysis.command === "תודה") {
     const randomThankYou = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
@@ -595,7 +551,7 @@ function generateSmartResponse(message, movies) {
     console.log("Debug: generateSmartResponse - 'Other' command detected, incrementing offset to:", conversationMemory.recommendationOffset);
   }
 
-  // עדכון זיכרון השיחה - שמירה על ז'אנרים קיימים אם לא הוזנו חדשים
+  // עדכון זיכרון השיחה
   if (analysis.genres.length > 0) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
@@ -631,7 +587,7 @@ function generateSmartResponse(message, movies) {
 
   console.log("Debug: generateSmartResponse - allRequiredInfoCollected:", allRequiredInfoCollected);
 
-if (allRequiredInfoCollected) {
+  if (allRequiredInfoCollected) {
     conversationMemory.conversationState = "recommending";
     
     console.log("🎯 מחפש סרטים עם הז'אנרים:", conversationMemory.lastGenres);
@@ -674,7 +630,6 @@ if (allRequiredInfoCollected) {
             break;
         }
       }
-      
 
     } else {
       if (conversationMemory.recommendationOffset > 0) {
@@ -742,7 +697,7 @@ if (allRequiredInfoCollected) {
   return response || "אשמח לעזור לך למצוא סרט מושלם! מה מעניין אותך?";
 }
 
-// פונקציה לחיפוש סרטים - עם התיקונים
+// פונקציה לחיפוש סרטים
 function analyzeAndFindMovies(message, movies) {
   const analysis = analyzeText(message);
   let filtered = [...movies];
@@ -750,16 +705,14 @@ function analyzeAndFindMovies(message, movies) {
   console.log("🔍 ניתוח הודעה:", message);
   console.log("📊 תוצאות ניתוח:", analysis);
   console.log("🧠 זיכרון שיחה נוכחי:", conversationMemory);
-  console.log("🎯 מחפש ז'אנרים:", conversationMemory.lastGenres); // DEBUG נוסף
+  console.log("🎯 מחפש ז'אנרים:", conversationMemory.lastGenres);
     
-  // סינון לפי ז'אנר (שימוש בזיכרון השיחה)
+  // סינון לפי ז'אנר
   if (conversationMemory.lastGenres.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by genres:", conversationMemory.lastGenres);
     filtered = filtered.filter(movie => {
       const movieGenres = movie.Genres.toLowerCase().split(", ");
       
-      // שינוי: במקום לבדוק שכל הז'אנרים המבוקשים קיימים,
-      // נבדוק שלפחות אחד מהז'אנרים המבוקשים קיים בסרט
       return conversationMemory.lastGenres.some(requestedGenre => {
         const englishGenre = getEnglishGenre(requestedGenre);
         const englishGenreWords = englishGenre.toLowerCase().split(/[\s-]+/);
@@ -775,7 +728,7 @@ function analyzeAndFindMovies(message, movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after genre filtering:", filtered.map(m => m.Title));
   }
 
-  // סינון לפי מצב רוח (שימוש בזיכרון השיחה)
+  // סינון לפי מצב רוח
   if (conversationMemory.lastMoods.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by mood. Current movies:", filtered.map(m => m.Title));
     const mood = conversationMemory.lastMoods[0];
@@ -821,7 +774,7 @@ function analyzeAndFindMovies(message, movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after mood filtering:", filtered.map(m => m.Title));
   }
 
-  // סינון לפי פלטפורמה (שימוש בזיכרון השיחה)
+  // סינון לפי פלטפורמה
   if (conversationMemory.lastPlatforms.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by platforms. Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => 
@@ -830,7 +783,7 @@ function analyzeAndFindMovies(message, movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after platform filtering:", filtered.map(m => m.Title));
   }
 
-  // תיקון הבעיה בסינון לפי גיל - "All Ages" צריך להיות תואם ל"7+"
+  // סינון לפי גיל
   if (conversationMemory.userPreferences.age) {
     console.log("Debug: analyzeAndFindMovies - Filtering by age. User preference:", conversationMemory.userPreferences.age, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
@@ -838,16 +791,15 @@ function analyzeAndFindMovies(message, movies) {
       const userAgePreference = conversationMemory.userPreferences.age;
       let isMatch = false;
 
-      // תיקון: "All Ages" צריך להיות תואם לכל הגילאים
       if (movieAgeRange === "All Ages") {
-        isMatch = true; // "All Ages" מתאים לכל הגילאים
+        isMatch = true;
       } else {
         if (userAgePreference === "7+") {
           isMatch = (movieAgeRange === "7+");
         } else if (userAgePreference === "13+") {
           isMatch = (movieAgeRange === "7+" || movieAgeRange === "13+");
         } else if (userAgePreference === "17+") {
-          isMatch = true; // מבוגרים יכולים לראות הכל
+          isMatch = true;
         }
       }
       
@@ -857,7 +809,7 @@ function analyzeAndFindMovies(message, movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after age filtering:", filtered.map(m => m.Title));
   }
 
-  // סינון לפי אורך סרט (שימוש בזיכרון השיחה)
+  // סינון לפי אורך סרט
   if (conversationMemory.userPreferences.duration) {
     console.log("Debug: analyzeAndFindMovies - Filtering by duration. User preference:", conversationMemory.userPreferences.duration, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
@@ -870,7 +822,7 @@ function analyzeAndFindMovies(message, movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after duration filtering:", filtered.map(m => m.Title));
   }
 
-  // סינון לפי שחקנים (שימוש בזיכרון השיחה)
+  // סינון לפי שחקנים
   if (conversationMemory.userPreferences.favoriteActors.length > 0) {
     filtered = filtered.filter(movie => 
       conversationMemory.userPreferences.favoriteActors.some(actor => 
@@ -879,7 +831,7 @@ function analyzeAndFindMovies(message, movies) {
     );
   }
 
-  // סינון לפי במאים (שימוש בזיכרון השיחה)
+  // סינון לפי במאים
   if (conversationMemory.userPreferences.favoriteDirectors.length > 0) {
     filtered = filtered.filter(movie => 
       conversationMemory.userPreferences.favoriteDirectors.some(director => 
@@ -937,12 +889,10 @@ function formatMovieRecommendation(movie) {
   if (movie["יס"] === 1) platforms.push("יס");
   if (movie["הוט"] === 1) platforms.push("הוט");
 
-  // יצירת קישור לטריילר - נשתמש בקישור ישיר אם קיים, אחרת בחיפוש
   let trailerLinkHTML = '';
   if (movie.trailer) {
       trailerLinkHTML = `<br>🎥 <a href="${movie.trailer}" target="_blank" class="movie-link">צפה בטריילר</a>`;
   } else {
-      // יצירת קישור לחיפוש הטריילר ב-YouTube כגיבוי
       const searchQuery = encodeURIComponent(`${movie.Title} ${movie.Release_Year} trailer`);
       const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
       trailerLinkHTML = `<br>🎥 <a href="${youtubeSearchUrl}" target="_blank" class="movie-link">חפש טריילר ביוטיוב</a>`;
@@ -954,19 +904,18 @@ function formatMovieRecommendation(movie) {
 👥 גיל מומלץ: ${movie.ageRange}<br>
 📺 זמין ב: ${platforms.join(", ") || "לא צוינה פלטפורמה"}`;
 
-  // הוספת קישור הטריילר (או חיפוש) שיצרנו
   html += trailerLinkHTML;
 
   return html;
 }
 
-// 📨 הפונקציה הראשית לשליחת הודעה
+// פונקציה לשליחת הודעה
 async function sendMessage() {
   const input = document.getElementById("userInput");
   const message = input.value.trim();
   if (!message) return;
 
-  input.value = ""; // Clear input immediately at the very beginning
+  input.value = "";
 
   const lowerMessage = message.toLowerCase();
   const greetings = ["היי", "שלום", "הי", "בוקר טוב"];
@@ -974,29 +923,24 @@ async function sendMessage() {
 
   const convo = document.getElementById("conversation");
 
-  // Handle explicit reset commands first
   if (resetKeywords.some(k => lowerMessage.includes(k))) {
-    clearConversation(message); // clearConversation will handle displaying user message and new welcome.
+    clearConversation(message);
     convo.scrollTop = convo.scrollHeight;
-    return; // Exit function after handling reset
+    return;
   }
 
-  // Handle simple greetings without resetting the whole conversation
   if (greetings.some(g => lowerMessage.includes(g))) {
-    convo.innerHTML += `<div class='bubble user'>${message}</div>`; // Display user's greeting
-    // Display bot's welcome message without clearing history
+    convo.innerHTML += `<div class='bubble user'>${message}</div>`;
     const welcomeResponse = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     convo.innerHTML += `<div class='bubble bot'>
       <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
       <div class="bot-message">${welcomeResponse}</div>
     </div>`;
     convo.scrollTop = convo.scrollHeight;
-    // Do NOT reset conversationMemory here, just respond and continue
-    return; // Exit after greeting response
+    return;
   }
 
-  // If not a reset or a simple greeting, proceed as usual:
-  convo.innerHTML += `<div class='bubble user'>${message}</div>`; // Add user's message
+  convo.innerHTML += `<div class='bubble user'>${message}</div>`;
   const loadingId = Date.now();
   convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
@@ -1023,7 +967,6 @@ async function sendMessage() {
 
   convo.scrollTop = convo.scrollHeight;
 }
-
 
 // פונקציה לטיפול בשגיאות
 function showError(error) {
@@ -1052,7 +995,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const input = document.getElementById("userInput");
   const convo = document.getElementById("conversation");
   
-  // בדיקה שהאלמנטים קיימים
   if (!input || !convo) {
     console.error("❌ אלמנטים חיוניים לא נמצאו");
     return;
@@ -1060,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log("✅ אלמנטים נמצאו בהצלחה");
   
-  // הגדרת event listener לקלט
   input.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       sendMessage();
@@ -1068,7 +1009,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   console.log("✅ Event listener הוגדר לקלט");
 
-  // הודעת פתיחה
   try {
     const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     console.log("🎭 הודעת ברוכים הבאים נבחרה:", randomWelcome);
@@ -1082,7 +1022,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch (error) {
     console.error("❌ שגיאה בהוספת הודעת פתיחה:", error);
     
-    // הודעה קבועה במקרה של שגיאה
     convo.innerHTML = `<div class='bubble bot'>
       <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
       <div class="bot-message">שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 איזה סרט מעניין אותך היום?</div>
@@ -1092,10 +1031,10 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log("🎉 אתחול הושלם בהצלחה - אוסקר מוכן לשימוש!");
 });
 
-// פונקציה לניקוי השיחה - כעת מקבלת את הודעת המשתמש כארגומנט
+// פונקציה לניקוי השיחה
 function clearConversation(userMessage = null) {
   const convo = document.getElementById("conversation");
-  convo.innerHTML = ''; // Always clear the conversation
+  convo.innerHTML = '';
   conversationMemory = {
     lastGenres: [],
     lastMoods: [],
@@ -1119,7 +1058,6 @@ function clearConversation(userMessage = null) {
     recommendationOffset: 0
   };
   
-  // אם נשלחה הודעת משתמש, הוסף אותה ראשונה
   if (userMessage) {
     convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
   }
@@ -1129,4 +1067,15 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-}
+};
+  }
+
+  const questionOrder = ["genres", "age", "duration", "platforms"];
+  
+  for (const questionId of questionOrder) {
+    if (!conversationMemory.collectedInfo[questionId]) {
+      return interactiveQuestions.find(q => q.id === questionId);
+    }
+  }
+
+  return null
