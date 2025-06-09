@@ -495,6 +495,17 @@ function getNextQuestion() {
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
     return null;
+  }
+
+  const questionOrder = ["genres", "age", "duration", "platforms"];
+  
+  for (const questionId of questionOrder) {
+    if (!conversationMemory.collectedInfo[questionId]) {
+      return interactiveQuestions.find(q => q.id === questionId);
+    }
+  }
+
+  return null;
 }
 
 // פונקציה ליצירת תשובה חכמה
@@ -1067,15 +1078,4 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-};
-  }
-
-  const questionOrder = ["genres", "age", "duration", "platforms"];
-  
-  for (const questionId of questionOrder) {
-    if (!conversationMemory.collectedInfo[questionId]) {
-      return interactiveQuestions.find(q => q.id === questionId);
-    }
-  }
-
-  return null
+}
